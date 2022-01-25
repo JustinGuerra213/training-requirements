@@ -1,0 +1,230 @@
+---
+title: "R for DataScience"
+author: "Justin Guerra"
+date: "11/12/2021"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+```{r, include=FALSE}
+## Loading in libraries and links for reading in the data
+Gapminder_Filelink <- "/Users/jub78/Documents/GitHub/training-requirements/R for Data Science/gapminder_clean.csv"
+
+library(magrittr)
+library(dplyr)
+library(readxl)
+library(readr)
+library(tibble)
+library(ggplot2)
+library(knitr)
+library(DT)
+library(ggpubr)
+library(plotly)
+```
+
+### Question 1: Reading in the Gapminder Data into R
+```{r, message = FALSE}
+GapminderData <- read_csv(file = Gapminder_Filelink) %>%
+  as_tibble(show_col_types = FALSE) %>%
+  select(-`...1`)
+```
+
+
+
+```{r, echo = FALSE}
+GapminderData %>% datatable()
+```
+
+
+
+What we see here is the Gapminder dataset (even though it says it's cleaned it's not....). This dataset details various metrics, ranging from economic to agriculture, that describes specific countries within the world over time. 
+
+
+## Question 2: Filter Gapminder dataset by year of 1962 and make a scatter plot 
+```{r}
+filtered_year = 1962
+GapminderFilteredYear <- GapminderData %>% 
+  dplyr::filter(Year == filtered_year)
+```
+
+```{r, echo = FALSE}
+GapminderFilteredYear %>% datatable()
+```
+
+
+
+# Question 2 (cont.): Make a scatter plot of the filtered dataset based on CO2 emssions and gdpPercap
+```{r}
+ScatterPlot <- GapminderFilteredYear %>%
+  ggplot(., aes(x = gdpPercap, 
+                y = `CO2 emissions (metric tons per capita)`)) + 
+  geom_point() +
+  theme_classic()
+```
+
+```{r, echo = FALSE}
+ScatterPlot
+```
+
+From our dataset, we can see that there is a positively linear relationship between CO2 emissions and GDP per capita. Now lets investigate further on how strong the correlation is based on the pearson correlation (R) coefficient.
+
+## Question 3: On the filtered data, calculate the pearson correlation of 'CO2 emissions (metric tons per capita)' and gdpPercap. What is the Pearson R value and associated p value?
+```{r}
+test = "pearson"
+rm_na = "complete.obs"
+pearson_corr = cor(GapminderFilteredYear$`CO2 emissions (metric tons per capita)`,
+    GapminderFilteredYear$gdpPercap, 
+    method = test,
+    use = rm_na) * 100
+```
+
+```{r, echo = FALSE}
+x = "CO2 emissions (metric tons per capita)"
+y = "gdpPercap"
+reg_line = "reg.line"
+
+GapminderFilteredYear %>% ggscatter(.,
+                                    x = x,
+                                    y = y, 
+                                    add = reg_line,
+                                    conf.int = TRUE,
+                                    cor.coef = TRUE,
+                                    cor.method = test)
+```
+
+
+```{r, echo = FALSE}
+statement = "The pearson correlation coefficient between CO2 emissions and GDP per capita is "
+percent = "%"
+cat(paste0(statement, pearson_corr %>% round(., digits = 1), percent))
+```
+
+From what we can see here, the pearson correlation coefficient is approximately 92.61%, meaning that there is a strong positive correlation between CO2 emissions and GDP per capita in all countries in the year of 1962. In addition, the p-value (2.2 * 10^-6) is less than 0.05, meaning that the correlation of the two variables are significant to one another. Now lets take a look at all years and see which has the highest pearson correlation coefficient.
+
+
+## Question 4: On the unfiltered data, answer "In what year is the correlation between 'CO2 emissions (metric tons per capita)' and gdpPercap the strongest?" Filter the dataset to that year for the next step...
+```{r}
+test = "pearson"
+rm_na = "complete.obs"
+CO2_year = vector(mode = "list")
+gdpPercap_year = vector(mode = "list")
+PearsonCorrYears = vector(mode = "list")
+YearChartoNum = vector(mode = "list")
+
+
+
+GapminderYear = GapminderData %>% #selecting the all the unique years iteration
+  select(Year) %>% 
+  unique() %>% 
+  pull() %>%
+  as.character() #For names in the list
+
+PearsonCorrYears = GapminderYear %>% #Make into a list by iterating through the years
+  sapply(.,
+         USE.NAMES = TRUE, 
+         simplify = FALSE,
+         function(year){
+           
+           YearChartoNum[[year]] = year %>% #Convert characters to numeric values
+             as.numeric()
+           
+
+           CO2_year[[year]] = GapminderData %>% #list for the CO2 emissions by year
+             filter(Year == YearChartoNum[[year]]) %>%
+             select(`CO2 emissions (metric tons per capita)`) %>%
+             pull()
+
+           gdpPercap_year[[year]] = GapminderData %>% #list for the GDP per capita by
+              filter(Year == YearChartoNum[[year]]) %>%                  #year
+              select(gdpPercap) %>%
+              pull()
+
+            cor(x = GapminderData %>% #Pearson Correlation coefficient iterated by year
+                  filter(Year == YearChartoNum[[year]]) %>%
+                  select(`CO2 emissions (metric tons per capita)`) %>%
+                  pull(),
+                y = gdpPercap_year[[year]],
+               method = test,
+               use = rm_na)
+            
+            }) %>% unlist()
+```
+
+
+```{r, echo = FALSE}
+PearsonCorrYears %>% 
+  sort(., decreasing = TRUE)
+```
+
+After iterating over the years in the Gapminder dataset, we can see that the highest Pearson correlation coefficient occurs in 1967 suggesting that year has the strongest correlation (93.88%) between CO2 emissions and GDP per capita. Now lets filter the Gapminder dataset again with that year and plot a scatterplot through plotly. 
+
+## Question 5: Using plotly, create an interactive scatter plot comparing 'CO2 emissions (metric tons per capita)' and gdpPercap, where the point size is determined by pop (population) and the color is determined by the continent. You can easily convert any ggplot plot to a plotly plot using the ggplotly() command.
+
+```{r}
+PearsonCorrMaxYear = PearsonCorrYears[which.max(PearsonCorrYears)] %>%
+  names() %>% 
+  as.numeric() #Finding the max year for the analysis
+
+GapminderFilteredMax = GapminderData %>% ##Filter by year with the highest Pearson
+  filter(Year == PearsonCorrMaxYear)     ##correlation coefficient of CO2 and GDP
+
+GapminderMaxplot = GapminderFilteredMax %>% ## ggplot implementation
+  ggplot(., aes(x =`CO2 emissions (metric tons per capita)`,
+                y = gdpPercap,
+                size = pop)) +
+  geom_point() + theme_classic()
+```
+
+```{r, echo = FALSE}
+GapminderMaxplot %>%
+  ggplotly()
+```
+Here is the plotly implementation of the Gapminder dataset during the year of 1962. The scatterplot is interactive and you can see the different values (gdpPercap, CO2 emissions) in each point of the plot.
+
+### New Question 1: What is the relationship between continent and 'Energy use (kg of oil equivalent per capita)'? (stats test needed)
+
+
+```{r}
+GapminderContinentEnergyUse <- GapminderData %>% 
+  select(continent,`Energy use (kg of oil equivalent per capita)`) %>% 
+  na.omit()
+```
+```{r}
+ggboxplot(GapminderContinentEnergyUse, 
+          x = "continent",
+          y = "Energy use (kg of oil equivalent per capita)",
+          color = "continent",
+          add = "jitter",
+          shape = "continent")
+```
+
+
+
+
+```{r}
+lm(formula = `Energy use (kg of oil equivalent per capita)` ~ continent,
+   data = GapminderContinentEnergyUse) %>% summary()
+```
+
+### New Question 2: Is there a significant difference between Europe and Asia with respect to 'Imports of goods and services (% of GDP)' in the years after 1990? (stats test needed)
+
+```{r}
+
+```
+
+### New Question 3: What is the country (or countries) that has the highest 'Population density (people per sq. km of land area)' across all years? (i.e., which country has the highest average ranking in this category across each time point in the dataset?)
+
+```{r}
+GapminderPopDensity <- GapminderData %>% 
+  select(`Country Name`, 
+         `Population density (people per sq. km of land area)`,
+         Year) 
+GapminderPopDensity  %>% 
+  ggplot(., 
+         aes(x = Year, 
+              y = `Population density (people per sq. km of land area)`,
+              color = `Country Name`)) +
+  geom_point()
+```
+
