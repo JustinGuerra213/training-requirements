@@ -90,6 +90,7 @@ ScatterPlot <- GapminderFilteredYear  %>%
   )) +
   geom_point() +
   ggtitle("Relationship between CO2 emissions and gdpPerCap in 1962") +
+  theme_classic() +
   theme(plot.title = element_text(hjust = 0.5))
 ```
 
@@ -124,7 +125,9 @@ GapminderFilteredYear %>% ggscatter(.,
   conf.int = TRUE,
   cor.coef = TRUE,
   cor.method = test
-) + labs(x = "log10(CO2 emissions (metric tons per capita))")
+) + labs(x = "log10(CO2 emissions (metric tons per capita))") +
+  ggtitle("Relationship between CO2 emissions and gdpPerCap in 1962") + 
+  theme(plot.title = element_text(hjust = 0.5))
 ```
 
 
@@ -217,7 +220,8 @@ GapminderMaxplot <- GapminderFilteredMax %>% ## ggplot implementation
     size = pop,
     color = continent
   )) +
-  geom_point() +
+  geom_point() + 
+  ggtitle("Relationship between Log Transformed gdpPercap & CO2 emissions") +
   theme_classic()
 ```
 
