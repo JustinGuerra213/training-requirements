@@ -29,18 +29,17 @@ library(DT)
 library(tidyr)
 library(ggpubr)
 library(plotly)
+library(data.table)
 library(forcats)
 ```
 
 # Question 1: Reading in the Gapminder Data into R
-```{r, warning = FALSE}
-suppressWarnings({
+```{r, message = FALSE}
   
 GapminderData <- read_csv(file = Gapminder_Filelink) %>%
   as_tibble(show_col_types = FALSE) %>%
   select(-`...1`)
 
-})
 ```
 
 
@@ -333,38 +332,28 @@ Gapminder_summarize_PopDensity_df = summarise(GapminderData,
 
 })
 
-Country_name = Gapminder_summarize_PopDensity_df %>%
-  dplyr::select(`Country Name`) %>% 
+Year = Gapminder_summarize_PopDensity_df %>%
+  dplyr::select(Year) %>% 
   dplyr::pull() %>%
   unique() 
 
-MeanPopDensity_Country = sapply(X = Country_name,
+MeanPopDensity_Country = sapply(X = Year,
        simplify = FALSE,
-       FUN = function(country){
+       FUN = function(year){
          
          Gapminder_summarize_PopDensity_df %>%
-           dplyr::filter(`Country Name` == country) %>%
-           dplyr::select(`Population density (people per sq. km of land area)`) %>%
-           dplyr::pull() %>%
-           mean()
+           dplyr::filter(Year == year) %>%
+           arrange(desc(`Population density (people per sq. km of land area)`)) %>%
+           slice(which.max(`Population density (people per sq. km of land area)`))
          
          
-         
-         
-}) %>% unlist()
+}) %>% rbindlist()
 ```
 
 
 
 ```{r}
-MeanPopDensity_Country %>% ## Visualizing the highest pearson correlation coefficent by DT
-  sort(., decreasing = TRUE) %>%
-  as.data.frame() %>%
-  rownames_to_column() %>%
-  rename(
-    Country = rowname,
-    `Mean Population density (people per sq. km of land area)` = "."
-  ) %>%
+MeanPopDensity_Country %>%
   datatable()
 ```
 
