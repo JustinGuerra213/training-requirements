@@ -1,0 +1,459 @@
+---
+title: "R for Data Science"
+author: "Justin Guerra"
+date: "11/12/2021"
+output:
+  html_document:
+    toc: true
+    toc_float:
+        toc_collapased: true
+    toc_depth: 3
+    number_sections: true
+    theme: lumen
+    code_folding: hide
+  pdf_document: default
+---
+
+```{r, include=FALSE}
+## Loading in libraries and links for reading in the data
+Gapminder_Filelink <- "C:/Users/justi/OneDrive/Desktop/training-requirements/R for Data Science/gapminder_clean.csv"
+
+library(magrittr)
+library(dplyr)
+library(readxl)
+library(readr)
+library(tibble)
+library(ggplot2)
+library(knitr)
+library(DT)
+library(tidyr)
+library(ggpubr)
+library(plotly)
+library(data.table)
+library(forcats)
+```
+
+# Question 1: Reading in the Gapminder Data into R
+```{r, message = FALSE}
+  
+GapminderData <- read_csv(file = Gapminder_Filelink) %>%
+  as_tibble(show_col_types = FALSE) %>%
+  select(-`...1`)
+
+```
+
+
+
+```{r, echo = FALSE}
+GapminderData %>% datatable(options = list(
+                # dom = 't',
+                # deferRender = TRUE,
+                searching = TRUE,
+                autoWidth = TRUE,
+                # scrollCollapse = TRUE,
+                rownames = FALSE,
+                scroller = TRUE,
+                scrollX = TRUE,
+                scrollY = "500px",
+                fixedHeader = TRUE,
+                class = 'cell-border stripe',
+                fixedColumns = list(
+                  leftColumns = 3,
+                  heightMatch = 'none'
+                  )))
+```
+
+
+
+What we see here is the Gapminder dataset (even though it says it's cleaned it's not....). This dataset details various metrics, ranging from economic to agriculture, that describes specific countries within the world over time. 
+
+
+## Question 2: Filter Gapminder dataset by year of 1962 and make a scatter plot 
+```{r}
+filtered_year <- 1962
+GapminderFilteredYear <- GapminderData %>%
+  drop_na(gdpPercap,`CO2 emissions (metric tons per capita)`) %>%
+  mutate(`log10(gdpPercap)` = log(gdpPercap)) %>%
+  mutate(`log10(CO2 emissions (metric tons per capita))` = log(`CO2 emissions (metric tons per capita)`)) %>%
+  dplyr::filter(Year == filtered_year)
+```
+
+
+
+# Question 2 (cont.): Make a scatter plot of the filtered dataset based on CO2 emissions and gdpPercap
+```{r, warning = FALSE}
+ScatterPlot <- GapminderFilteredYear  %>%
+  ggplot(., aes(
+    x = `log10(gdpPercap)`,
+    y = `log10(CO2 emissions (metric tons per capita))`
+  )) +
+  geom_point() +
+  ggtitle("Relationship between CO2 emissions and gdpPerCap in 1962") +
+  theme_classic() +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+```{r, echo = FALSE}
+ScatterPlot
+```
+
+From our dataset, we can see that there is a positively linear relationship between CO2 emissions and GDP per capita. Now lets investigate further on how strong the correlation is based on the pearson correlation (R) coefficient.
+
+## Question 3: On the filtered data, calculate the pearson correlation of 'CO2 emissions (metric tons per capita)' and gdpPercap. What is the Pearson R value and associated p value?
+```{r, warning = FALSE}
+test <- "pearson"
+rm_na <- "complete.obs"
+pearson_corr <- cor(GapminderFilteredYear$`log10(CO2 emissions (metric tons per capita))`,
+  GapminderFilteredYear$`log10(gdpPercap)`,
+  method = test,
+  use = rm_na
+) * 100
+```
+
+```{r, echo = FALSE}
+GapminderFilteredYear = GapminderFilteredYear %>% dplyr::mutate(`CO2 Emissions Log Transformed` = `log10(CO2 emissions (metric tons per capita))`)
+
+x <- "CO2 Emissions Log Transformed"
+y <- "log10(gdpPercap)"
+reg_line <- "reg.line"
+
+GapminderFilteredYear %>% ggscatter(.,
+                                    x = x,
+  y = y,
+  add = reg_line,
+  conf.int = TRUE,
+  cor.coef = TRUE,
+  cor.method = test
+) + labs(x = "log10(CO2 emissions (metric tons per capita))") +
+  ggtitle("Relationship between CO2 emissions and gdpPerCap in 1962") + 
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+
+```{r, echo = FALSE}
+statement <- "The pearson correlation coefficient between CO2 emissions and GDP per capita is "
+percent <- "%"
+cat(paste0(statement, pearson_corr %>% round(., digits = 1), percent))
+```
+
+From what we can see here, the pearson correlation coefficient is approximately 86%, meaning that there is a strong positive correlation between CO2 emissions and GDP per capita in all countries in the year of 1962. In addition, the p-value (2.2 * 10^-6) is less than 0.05, meaning that the correlation of the two variables are significant to one another. Now lets take a look at all years and see which has the highest pearson correlation coefficient.
+
+
+## Question 4: On the unfiltered data, answer "In what year is the correlation between 'CO2 emissions (metric tons per capita)' and gdpPercap the strongest?" Filter the dataset to that year for the next step...
+```{r}
+test <- "pearson"
+rm_na <- "complete.obs"
+Gapminder_summarize_df <- vector(mode = "list")
+
+
+
+GapminderYear <- GapminderData %>% # selecting the all the unique years iteration
+  select(Year) %>%
+  unique() %>%
+  pull() %>%
+  as.numeric() # For names in the list
+
+suppressWarnings({
+  
+  Gapminder_summarize_df = summarise(GapminderData,
+          Year,gdpPercap,
+          `CO2 emissions (metric tons per capita)`)
+  
+})
+
+PearsonCorrYears <- GapminderYear %>% # Make into a list by iterating through the years
+  sapply(.,
+    USE.NAMES = TRUE,
+    simplify = FALSE,
+    function(year) {
+      
+      cor(
+        x = Gapminder_summarize_df %>%
+          dplyr::filter(Year == year) %>%
+          dplyr::select(`CO2 emissions (metric tons per capita)`) %>%
+          dplyr::pull(),
+        y = Gapminder_summarize_df %>%
+          dplyr::filter(Year == year) %>%
+          dplyr::select(gdpPercap) %>%
+          dplyr::pull(),
+        method = test,
+        use = rm_na
+      )
+    }
+  ) %>% unlist()
+
+#Adding the names for the correlation values
+names(PearsonCorrYears) <- GapminderYear
+```
+
+
+```{r, echo = FALSE}
+PearsonCorrYears %>% ## Visualizing the highest pearson correlation coefficent by DT
+  sort(., decreasing = TRUE) %>%
+  as.data.frame() %>%
+  rownames_to_column() %>%
+  rename(
+    Year = rowname,
+    `Pearson Correlation Coefficent` = "."
+  ) %>%
+  datatable()
+```
+After iterating over the years in the Gapminder dataset, we can see that the highest Pearson correlation coefficient occurs in 1967 suggesting that year has the strongest correlation (93.88%) between CO2 emissions and GDP per capita. Now lets filter the Gapminder dataset again with that year and plot a scatterplot through plotly. 
+
+## Question 5: Using plotly, create an interactive scatter plot comparing 'CO2 emissions (metric tons per capita)' and gdpPercap, where the point size is determined by pop (population) and the color is determined by the continent. You can easily convert any ggplot plot to a plotly plot using the ggplotly() command.
+
+```{r}
+PearsonCorrMaxYear <- PearsonCorrYears[which.max(PearsonCorrYears)] %>%
+  names() %>%
+  as.numeric() # Finding the max year for the analysis
+
+GapminderFilteredMax <- GapminderData %>% ## Filter by year with the highest Pearson
+  filter(Year == PearsonCorrMaxYear) %>% ## correlation coefficient of CO2 and GDP
+  mutate(`log10(CO2 emissions (metric tons per capita))` = log10(`CO2 emissions (metric tons per capita)`),
+         `log10(gdpPercap)` = log10(gdpPercap))
+
+GapminderMaxplot <- GapminderFilteredMax %>% ## ggplot implementation
+  ggplot(., aes(
+    x = `log10(CO2 emissions (metric tons per capita))`,
+    y = `log10(gdpPercap)`,
+    size = pop,
+    color = continent
+  )) +
+  geom_point() + 
+  ggtitle("Relationship between Log Transformed gdpPercap & CO2 emissions") +
+  theme_classic()
+```
+
+```{r, echo = FALSE}
+GapminderMaxplot %>%
+  ggplotly()
+```
+Here is the plotly implementation of the Gapminder dataset during the year of 1962. The scatterplot is interactive and you can see the different values (gdpPercap, CO2 emissions) in each point of the plot.
+
+### New Question 1: What is the relationship between continent and 'Energy use (kg of oil equivalent per capita)'? (stats test needed)
+
+
+```{r}
+GapminderContinentEnergyUse <- GapminderData %>%
+  dplyr::mutate(`log(Energy use (kg of oil equivalent per capita))` = log10(`Energy use (kg of oil equivalent per capita)`)) %>%
+  select(continent, `log(Energy use (kg of oil equivalent per capita))`) %>%
+  na.omit()
+```
+
+```{r, echo = FALSE}
+ggboxplot(GapminderContinentEnergyUse,
+  x = "continent",
+  y = "`log(Energy use (kg of oil equivalent per capita))`",
+  color = "continent",
+  add = "jitter",
+  shape = "continent"
+)
+```
+
+In order to determine the exact relationship between the each continent (categorical variable) and Energy use (kg of oil equivalent per capita) (continuous variable), we need to construct a linear model of the data and do ANOVA across all the continent groups. 
+```{r}
+lm(
+  formula = `log(Energy use (kg of oil equivalent per capita))` ~ continent,
+  data = GapminderContinentEnergyUse
+) %>% summary()
+```
+From the results above, we have the following equation:
+
+<center>Y = continentAmericas * x1 + continentAsia * x2 + continentEurope * x3 + continentOceania * x4 + Intercept
+ 
+<left>Definitions of the variables: 
+<br>Y = Energy use (kg of oil equivalent per capita) (continuous variable)
+<br>x1 = North and South America (categrorical variable i.e 0 or 1)
+<br>x2 = Asia (categrorical variable i.e 0 or 1)
+<br>x3 = Europe (categrorical variable i.e 0 or 1)
+<br>x4 = Oceania (categrorical variable i.e 0 or 1)
+<br>continentAmericas = 0.27191
+<br>continentAsia = 0.23187
+<br>continentEurope = 0.70072
+<br>continentOceania = 0.85552
+<br>Intercept = 2.72558
+
+We can conclude that since all the p-values are less than 0.05 for each continent, we can reject the null hypothesis and interpret that all the continent variables have a statistically significant relationship. 
+Furthermore, since all the continent coefficents are positive, we can see that each continent has a positive relationship with the Energy use (kg of oil equivalent per capita).
+ 
+                                                                      
+### New Question 2: Is there a significant difference between Europe and Asia with respect to 'Imports of goods and services (% of GDP)' in the years after 1990? (stats test needed)
+
+```{r}
+continents_of_interest <- c("Europe", "Asia")
+variables_of_interest <- c("continent", "Year", "Imports of goods and services (% of GDP)")
+
+Euro_Asia_Imports <- GapminderData %>%
+  dplyr::filter(continent %in% continents_of_interest &
+    Year > 1990) %>%
+  dplyr::select(variables_of_interest) %>%
+  na.omit()
+```
+
+
+
+
+```{r}
+ggboxplot(Euro_Asia_Imports,
+  x = "continent",
+  y = "`Imports of goods and services (% of GDP)`",
+  color = "continent",
+  add = "jitter",
+  shape = "continent"
+)
+```
+
+
+In order to determine whether or not there is a significant difference between Europe and
+Asia based on Imports of goods and services (% of GDP) after 1990, we need to determine whether we use the t-test or the Welch t-test. 
+
+From what we see from this boxplot above, there are small differences of variation (i.e. spread) of the data between Asia and Europe, so the Welch t-test is the most appropriate for this type of test.
+
+
+```{r}
+t.test(`Imports of goods and services (% of GDP)` ~ continent,
+  data = Euro_Asia_Imports
+)
+```
+
+Since the p-value (0.1776) > 0.05, we need to fail to reject the null hypothesis. We can conclude that there is not a statistically significant difference between Europe and Asia with respect to 'Imports of goods and services (% of GDP)' in the years after 1990. 
+
+### New Question 3: What is the country (or countries) that has the highest 'Population density (people per sq. km of land area)' across all years? (i.e., which country has the highest average ranking in this category across each time point in the dataset?)
+
+
+```{r}
+
+suppressWarnings({
+
+Gapminder_summarize_PopDensity_df = summarise(GapminderData,
+          Year,
+          `Population density (people per sq. km of land area)`,
+          `Country Name`)
+
+})
+
+Year = Gapminder_summarize_PopDensity_df %>%
+  dplyr::select(Year) %>% 
+  dplyr::pull() %>%
+  unique() 
+
+MeanPopDensity_Country = sapply(X = Year,
+       simplify = FALSE,
+       FUN = function(year){
+         
+         Gapminder_summarize_PopDensity_df %>%
+           dplyr::filter(Year == year) %>%
+           arrange(desc(`Population density (people per sq. km of land area)`)) %>%
+           slice(which.max(`Population density (people per sq. km of land area)`))
+         
+         
+}) %>% rbindlist()
+```
+
+
+
+```{r}
+MeanPopDensity_Country %>%
+  datatable()
+```
+
+The datatable below shows which country has the highest average population density in each time point in the dataset. From what we see, Monaco and Macao SAR, China have been dominating the population density from 1962-2007.
+
+
+### New Question 4: What country (or countries) has shown the greatest increase in 'Life expectancy at birth, total (years)' since 1962?
+
+```{r}
+LifeEx_Country = vector(mode = "list")
+
+GapminderCountry <- GapminderData %>% # selecting the all the unique years iteration
+  select(`Country Name`) %>%
+  unique() %>%
+  pull()
+
+suppressWarnings({
+  
+  Gapminder_LifeEx_df = summarise(GapminderData,
+          `Year`,
+          `Country Name`,
+          `Life expectancy at birth, total (years)`)
+  
+})
+
+PearsonCorrLifeEx_Country_NA <- GapminderCountry %>% # Finding countries that have NAs for Life expectancy
+    sapply(.,
+           USE.NAMES = TRUE,
+           simplify = FALSE,
+           function(country) {
+      
+      LifeEx_Country[[country]] = Gapminder_LifeEx_df %>%
+          dplyr::filter(`Country Name` == country) %>%
+          dplyr::select(`Life expectancy at birth, total (years)`) %>%
+          dplyr::pull()
+      
+      LifeEx_Country[[country]] %>% is.na() %>% sum()
+      
+
+}) %>% unlist() 
+```
+
+
+```{r}
+PearsonCorrLifeEx_Country_NA[PearsonCorrLifeEx_Country_NA != 0]
+```
+
+Removing these countries since they don't have complete values for all years in the 
+'Life expectancy at birth, total (years)' column.
+
+
+```{r}
+test <- "pearson"
+rm_na <- "complete.obs"
+LifeEx_Country = vector(mode = "list")
+Year_Country = vector(mode = "list")
+
+GapminderCountryLifeEx = PearsonCorrLifeEx_Country_NA[PearsonCorrLifeEx_Country_NA == 0] %>%
+  names() #No NAs
+
+PearsonCorrCountryLifeEx <- GapminderCountryLifeEx %>% # Make into a list by iterating through the years
+  sapply(.,
+    USE.NAMES = TRUE,
+    simplify = FALSE,
+    function(country) {
+      
+      LifeEx_Country[[country]] = Gapminder_LifeEx_df %>%
+          dplyr::filter(`Country Name` == country) %>%
+          dplyr::select(`Life expectancy at birth, total (years)`) %>%
+          dplyr::pull()
+      
+      Year_Country[[country]] = Gapminder_LifeEx_df %>%
+          dplyr::filter(`Country Name` == country) %>%
+          dplyr::select(Year) %>%
+          dplyr::pull()
+      
+      cor(x =  LifeEx_Country[[country]],
+          y =  Year_Country[[country]],
+          method = test,
+          use = rm_na)
+        
+      }) %>% unlist()
+```
+
+
+
+
+```{r}
+PearsonCorrCountryLifeEx %>% ## Visualizing the highest pearson correlation coefficent by DT
+  sort(., decreasing = TRUE) %>%
+  as.data.frame() %>%
+  rownames_to_column() %>%
+  rename(
+    Country = rowname,
+     `Pearson Correlation Coefficent` = "."
+  ) %>%
+  datatable()
+```
+
+
+From what we see here, after we removed countries with incomplete entries for all the years of life expectancy, Maldives has the highest increase percentage of Life expectancy at birth in years based on the Pearson Correlation coefficient. 
+
+

@@ -1,0 +1,104 @@
+---
+title: "RForDataScience_JustinGuerra_ReviewerComments"
+author: "Justin Guerra"
+date: "2023-07-13"
+output: html_document
+---
+
+
+
+This is a great start! You've got a pretty good grasp of R, but there's still quite a few things that need fixing.
+
+General things to fix:
+
+- You're missing Q4 of Part 2
+
+- One of the assessment's requirements is: "Additionally, the analysis must be user-friendly for a non-programmer and should intuitively convey the insights you uncovered." This means we don't want to show any extraneous information, and we want to highlight our core insight or answers.
+
+
+- Add some header YAML (look up "rmd yaml header options")
+
+	- Add a floating TOC for easy navigation
+
+	- Enable coding folding that hide code cells by default (also include all code cells in your Rmd)
+
+- Ideally, write your code in a way that doesn't give warnings
+
+
+Specific things to fix:
+
+- Part 1, Question 1
+
+	- Enable horizontal scrolling in your datatable so it doesn't widen the page 
+	
+	*Fixed -JG
+
+- Part 1, Question 2
+
+	- We don't need to see the datatable here
+	
+	*Fixed -JG
+
+	- Notice the data is quite bunched in the scatter plot. Perhaps we should scale our axes
+	
+	*Scaled by log transformation for CO2 emissions variable -JG
+
+	- Add a title so a reader can easy know what they're looking at
+	
+	*Added -JG
+
+- Part 1, Question 3
+
+	- Notice the data is quite bunched in the scatter plot. Perhaps we should scale our axes
+	
+	*Scaled by log transformation for CO2 emissions variable -JG
+
+	- Add a title so a reader can easy know what they're looking at
+	
+	*Added -JG
+
+- Part 1, Question 4
+
+	- The code for generating correlations for all years can be done much more efficiently (like 3 lines). Look into `group_by` and `summarize` from the `tidyverse`. Generally speaking, you should be leveraging tidy-style functions, and not looping as they are much faster
+	
+	*Used summarize function -JG
+
+- Part 1, Question 5
+
+	- Notice the data is quite bunched in the scatter plot. Perhaps we should scale our axes
+	
+	*Scaled CO2 emissions and gdpPerCap by log transformation -JG
+
+	- Add a title so a reader can easy know what they're looking at
+	
+	*Added -JG
+
+	- You forgot to color by continent
+	
+	*Added -JG
+
+
+- Part 2, Question 1
+
+	- Notice the skewed distribution on the box plot (lots of values bunched at the bottom, but also many other values spread upwards). What does this imply about your y-axis scale?
+	
+	*The scale is not good to see variation within energy use, so the values needs to be transformed (used log transformation). From the new results, we can see better variation of energy use between continents -JG
+
+- Part 2, Question 2
+
+	- We don't need to see a datatable here
+	
+	*Fixed -JG
+
+- Part 2, Question 3
+
+	- This is not quite right. Each Country should have a rank per year, then that rank is averaged across all years.
+	
+	*Fixed -JG
+
+- Part 2, Question 4
+
+	- Missing
+	
+	*Added -JG
+
