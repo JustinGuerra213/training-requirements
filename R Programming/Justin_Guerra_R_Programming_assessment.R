@@ -169,7 +169,7 @@ play_game <- function() {
       if (win_condition(board = board, player = computer) == TRUE) { # win condition
 
         print(board)
-        cat(paste0("Computer (", player, ") Wins!"))
+        cat(paste0("Computer Wins!"))
         break
       }
 
@@ -188,7 +188,7 @@ play_game <- function() {
 
       if (win_condition(board = board, player = player) == TRUE) {
         print(board)
-        cat(paste0("User (", player, ") Wins!"))
+        cat(paste0("User Wins!"))
         break
       }
 
@@ -208,7 +208,7 @@ play_game <- function() {
 
       if (win_condition(board = board, player = player) == TRUE) {
         print(board)
-        cat(paste0("User (", player, ") Wins!"))
+        cat(paste0("User Wins!"))
         break
       }
 
@@ -227,7 +227,7 @@ play_game <- function() {
 
       if (win_condition(board = board, player = computer) == TRUE) {
         print(board)
-        cat(paste0("Computer (", computer, ") Wins!"))
+        cat(paste0("Computer Wins!"))
         break
       }
 
