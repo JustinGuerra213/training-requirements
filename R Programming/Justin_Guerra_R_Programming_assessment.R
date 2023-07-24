@@ -19,17 +19,25 @@ starting_board <- function() {
 }
 
 # Player X_O function allows the user to pick if they want to be "X" or "O".
-# "X" goes first, "O" goes second.
+# "X" goes first, "O" goes second.s
 
 player_X_O <- function(response) {
   repeat{ # Repeat after computer's move
 
-    response <- readline(prompt = "X or O? ") # Asking the user to be X or O
+    if (interactive()) { # Establishing a connection with the terminal
+
+      con <- stdin()
+    } else {
+      con <- "stdin"
+    }
+
+    cat("X or O? ") # Asking the user to be X or O
+    response <- readLines(con = con, n = 1)
 
     if (response %in% c("X", "O")) {
       return(response)
     } else {
-      cat("Invalid input. Please try again.") # Error message
+      cat("Invalid input. Please try again. \n") # Error message
     }
   }
 }
@@ -40,11 +48,19 @@ player_X_O <- function(response) {
 
 player_move <- function(board) {
   repeat{
-    response <- readline(prompt = "Please enter coordinates for the board (row and column, comma separated) e.g 1,2: ") # Ask the user for the coordinates of the board
+    if (interactive()) { # Establishing a connection with the terminal
+
+      con <- stdin()
+    } else {
+      con <- "stdin"
+    }
+
+    cat("Please enter coordinates for the board (row and column, comma separated) e.g 1,2: ")
+    response <- readLines(con = con, n = 1) # Ask the user for the coordinates of the board
 
     if (str_detect(response, pattern = "[1-3],[1-3]") == FALSE) { # Detecting false input
 
-      cat("Invalid input. Please try again.")
+      cat("Invalid input. Please try again.\n\n")
     } else {
       coordinates <- strsplit(response, split = ",") %>% # Split the response into two interger values
         unlist() %>%
@@ -54,7 +70,7 @@ player_move <- function(board) {
 
         return(coordinates)
       } else {
-        cat("Invalid move. Please try again.") # repeat by asking the user again
+        cat("Invalid move. Please try again.\n\n") # repeat by asking the user again
       }
     }
   }
