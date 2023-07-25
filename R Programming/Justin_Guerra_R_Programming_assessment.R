@@ -37,7 +37,7 @@ player_X_O <- function(response) {
     if (response %in% c("X", "O")) {
       return(response)
     } else {
-      cat("Invalid input. Please try again. \n") # Error message
+      cat("Invalid input. Please try again. \n\n") # Error message
     }
   }
 }
@@ -158,6 +158,7 @@ play_game <- function() {
 
       if (win_condition(board = board, player = computer) == TRUE) { # win condition
         
+        cat("Current Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
@@ -168,13 +169,15 @@ play_game <- function() {
 
       if (!"" %in% board) { # draw condition if there are no moves for the user or computer to make
         
+        cat("Current Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
         cat("It's a draw!")
         break
       }
-
+      
+      cat("Current Board:\n")
       cat("---------------------\n")
       print(board)
       cat("---------------------\n")
@@ -182,6 +185,8 @@ play_game <- function() {
       board[move[1], move[2]] <- player
 
       if (win_condition(board = board, player = player) == TRUE) {
+        
+        cat("Current Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
@@ -192,6 +197,7 @@ play_game <- function() {
 
 
       if (!"" %in% board) {
+        cat("Current Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
@@ -199,7 +205,8 @@ play_game <- function() {
         break
       }
     } else { # User starts first for X
-
+      
+      cat("Current Board:\n")
       cat("---------------------\n")
       print(board)
       cat("---------------------\n")
@@ -207,6 +214,7 @@ play_game <- function() {
       board[move[1], move[2]] <- player
 
       if (win_condition(board = board, player = player) == TRUE) {
+        cat("Current Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
@@ -217,6 +225,7 @@ play_game <- function() {
 
 
       if (!"" %in% board) {
+        cat("Current Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
@@ -228,6 +237,7 @@ play_game <- function() {
       board[move[1], move[2]] <- computer
 
       if (win_condition(board = board, player = computer) == TRUE) {
+        cat("Current Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
@@ -237,6 +247,7 @@ play_game <- function() {
 
 
       if (!"" %in% board) {
+        cat("Current Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
