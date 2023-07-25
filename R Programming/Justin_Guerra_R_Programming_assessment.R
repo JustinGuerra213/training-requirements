@@ -139,8 +139,6 @@ win_condition <- function(board, player) {
 # play_game function starts the game of tic-tac-toe!
 
 play_game <- function() {
-
-
   # Initialize board and ask the user for input whether they want to be X or O
   board <- starting_board()
   player <- player_X_O()
@@ -157,26 +155,26 @@ play_game <- function() {
       board[move[1], move[2]] <- computer # computer coordinates
 
       if (win_condition(board = board, player = computer) == TRUE) { # win condition
-        
+
         cat("\nCurrent Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
-        cat(paste0("Computer Wins!"))
+        cat(paste0("Computer Wins!\n"))
         break
       }
 
 
       if (!"" %in% board) { # draw condition if there are no moves for the user or computer to make
-        
+
         cat("\nCurrent Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
-        cat("It's a draw!")
+        cat("It's a draw!\n")
         break
       }
-      
+
       cat("\nCurrent Board:\n")
       cat("---------------------\n")
       print(board)
@@ -185,12 +183,11 @@ play_game <- function() {
       board[move[1], move[2]] <- player
 
       if (win_condition(board = board, player = player) == TRUE) {
-        
         cat("\nCurrent Board:\n")
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
-        cat(paste0("User Wins!"))
+        cat(paste0("User Wins!\n"))
         break
       }
 
@@ -201,11 +198,11 @@ play_game <- function() {
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
-        cat("It's a draw!")
+        cat("It's a draw!\n")
         break
       }
     } else { # User starts first for X
-      
+
       cat("\nCurrent Board:\n")
       cat("---------------------\n")
       print(board)
@@ -218,7 +215,7 @@ play_game <- function() {
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
-        cat(paste0("User Wins!"))
+        cat(paste0("User Wins!\n"))
         break
       }
 
@@ -229,7 +226,7 @@ play_game <- function() {
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
-        cat("It's a draw!")
+        cat("It's a draw!\n")
         break
       }
 
@@ -241,7 +238,7 @@ play_game <- function() {
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
-        cat(paste0("Computer Wins!"))
+        cat(paste0("Computer Wins!\n"))
         break
       }
 
@@ -251,7 +248,7 @@ play_game <- function() {
         cat("---------------------\n")
         print(board)
         cat("---------------------\n")
-        cat("It's a draw!")
+        cat("It's a draw!\n")
         break
       }
     }
