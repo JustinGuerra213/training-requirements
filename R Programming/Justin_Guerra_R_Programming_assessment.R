@@ -100,13 +100,6 @@ computer_move <- function(board) {
   }
 }
 
-# random_time_interval is the function to "mimic" the computer to be thinking.
-random_time_interval <- function() {
-  sec <- sample(1:10, 1) # Emulate thinking time for the computer
-
-  return(sec)
-}
-
 
 # win_condition function are the different possibilities for the user or the
 # computer to win in the tic-tac-toe game. Vertical, horizontal, and diagonals
@@ -146,8 +139,7 @@ win_condition <- function(board, player) {
 # play_game function starts the game of tic-tac-toe!
 
 play_game <- function() {
-  # Thinking time for the computer
-  computer_time <- random_time_interval()
+
 
   # Initialize board and ask the user for input whether they want to be X or O
   board <- starting_board()
@@ -161,33 +153,38 @@ play_game <- function() {
   while (TRUE) {
     if (player == "O") { # User starts second for O
 
-      Sys.sleep(time = computer_time) # emulate the computer thinking
-
       move <- computer_move(board = board) # computer moves first as X
       board[move[1], move[2]] <- computer # computer coordinates
 
       if (win_condition(board = board, player = computer) == TRUE) { # win condition
-
+        
+        cat("---------------------\n")
         print(board)
+        cat("---------------------\n")
         cat(paste0("Computer Wins!"))
         break
       }
 
 
       if (!"" %in% board) { # draw condition if there are no moves for the user or computer to make
-
+        
+        cat("---------------------\n")
         print(board)
+        cat("---------------------\n")
         cat("It's a draw!")
         break
       }
 
-
+      cat("---------------------\n")
       print(board)
+      cat("---------------------\n")
       move <- player_move(board = board)
       board[move[1], move[2]] <- player
 
       if (win_condition(board = board, player = player) == TRUE) {
+        cat("---------------------\n")
         print(board)
+        cat("---------------------\n")
         cat(paste0("User Wins!"))
         break
       }
@@ -195,19 +192,24 @@ play_game <- function() {
 
 
       if (!"" %in% board) {
+        cat("---------------------\n")
         print(board)
+        cat("---------------------\n")
         cat("It's a draw!")
         break
       }
     } else { # User starts first for X
 
-
+      cat("---------------------\n")
       print(board)
+      cat("---------------------\n")
       move <- player_move(board = board)
       board[move[1], move[2]] <- player
 
       if (win_condition(board = board, player = player) == TRUE) {
+        cat("---------------------\n")
         print(board)
+        cat("---------------------\n")
         cat(paste0("User Wins!"))
         break
       }
@@ -215,25 +217,29 @@ play_game <- function() {
 
 
       if (!"" %in% board) {
+        cat("---------------------\n")
         print(board)
+        cat("---------------------\n")
         cat("It's a draw!")
         break
       }
-
-      Sys.sleep(time = computer_time) # emulate the computer thinking
 
       move <- computer_move(board = board)
       board[move[1], move[2]] <- computer
 
       if (win_condition(board = board, player = computer) == TRUE) {
+        cat("---------------------\n")
         print(board)
+        cat("---------------------\n")
         cat(paste0("Computer Wins!"))
         break
       }
 
 
       if (!"" %in% board) {
+        cat("---------------------\n")
         print(board)
+        cat("---------------------\n")
         cat("It's a draw!")
         break
       }
