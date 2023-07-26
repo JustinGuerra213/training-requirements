@@ -1,5 +1,8 @@
 # loading in libraries (please download from your end)
-library(stringr)
+library(magrittr)
+
+coordinates = c()
+total_row_col = c("1", "2", "3")
 
 # Randomizer for the computer thinking time
 set.seed(1)
@@ -47,6 +50,8 @@ player_X_O <- function(response) {
 
 player_move <- function(board) {
   repeat{
+    
+    
     if (interactive()) { # Establishing a connection with the terminal
 
       con <- stdin()
@@ -54,15 +59,22 @@ player_move <- function(board) {
       con <- "stdin"
     }
 
-    cat("Please enter coordinates for the board (row and column, comma separated) e.g 1,2: ")
-    response <- readLines(con = con, n = 1) # Ask the user for the coordinates of the board
+    cat("Which row? ")
+    n_row <- readLines(con = con, n = 1) # Ask the user for the row coordinate of the board
+    
+    cat("Which column? ")
+    n_col <- readLines(con = con, n = 1) # Ask the user for the column coordinates of the board
 
-    if (str_detect(response, pattern = "[1-3],[1-3]") == FALSE) { # Detecting false input
+    if (!(n_col %in% total_row_col) | !(n_row %in% total_row_col)) { # Detecting false input
 
       cat("Invalid input. Please try again.\n\n")
+      
     } else {
-      coordinates <- strsplit(response, split = ",") %>% # Split the response into two interger values
-        unlist() %>%
+      
+      coordinates[1] <- n_row %>%
+        as.integer()
+      
+      coordinates[2] <- n_col %>%
         as.integer()
 
       if (board[coordinates[1], coordinates[2]] == "") { # Return coordinates
@@ -143,15 +155,17 @@ win_condition <- function(board, player) {
 # play_game function starts the game of tic-tac-toe!
 
 play_game <- function() {
+  
+  cat("\nWelcome to the Tic-Tac-Toe Game!\n")
+  
   # Initialize board and ask the user for input whether they want to be X or O
   board <- starting_board()
   player <- player_X_O()
 
   # Computer will take the other letter depending what the user inputs
   computer <- ifelse(test = player == "X", "O", "X")
-
-
-
+  
+  
   while (TRUE) {
     if (player == "O") { # User starts second for O
 
