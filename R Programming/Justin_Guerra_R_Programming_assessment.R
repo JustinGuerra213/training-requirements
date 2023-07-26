@@ -7,7 +7,6 @@ total_row_col = c("1", "2", "3")
 # Randomizer for the computer thinking time
 set.seed(1)
 
-
 # starting_board function basically prints out a empty matrix in order to start
 # the game!
 
