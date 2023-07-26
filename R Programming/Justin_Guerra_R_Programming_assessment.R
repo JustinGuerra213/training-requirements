@@ -1,5 +1,4 @@
 # loading in libraries (please download from your end)
-library(lava)
 library(stringr)
 
 # Randomizer for the computer thinking time
@@ -100,6 +99,11 @@ computer_move <- function(board) {
   }
 }
 
+# Function for the antidiagonal
+antidiag <- function(x, offset = 0L) {
+  x[col(x) + row(x) - ncol(x) - 1L == offset]
+}
+
 
 # win_condition function are the different possibilities for the user or the
 # computer to win in the tic-tac-toe game. Vertical, horizontal, and diagonals
@@ -129,7 +133,7 @@ win_condition <- function(board, player) {
     return(TRUE)
   } # 1st diagonal
 
-  if (all(revdiag(board) == player)) {
+  if (all(antidiag(board) == player)) {
     return(TRUE)
   } # 2nd diagonal
 
